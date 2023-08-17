@@ -43,8 +43,8 @@ public class CreateChatCommandHandler : IRequestHandler<CreateChatCommand, OneOf
                Creator = creator,
                CreatedAt = DateTime.UtcNow,
                Participants = participents,
-               IsGroup = participents.Count > 1,
-               GroupName = participents.Count > 1 ? request.CreateChat.GroupName! : string.Join('@', participantsId)
+               IsGroup = participents.Count > 2,
+               GroupName = participents.Count > 2 ? request.CreateChat.GroupName! : string.Join('@', participents.Select(user => user.UserName))
            };
             var result = await _applicationDbContext.Chats.AddAsync(chat, cancellationToken);
             await _applicationDbContext.SaveChangesAsync(cancellationToken);

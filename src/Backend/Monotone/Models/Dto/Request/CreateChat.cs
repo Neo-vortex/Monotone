@@ -13,6 +13,6 @@ public class CreateChat
 
     public bool Validate()
     {
-        return OtherParticipents.Count <= 1 || GroupName != null;
+        return OtherParticipents.Count is <= 2 and >= 1 || GroupName != null;
     }
 }

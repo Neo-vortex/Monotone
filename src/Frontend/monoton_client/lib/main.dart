@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         primarySwatch: Colors.blue,
         brightness: Brightness.light,
+
         /* light theme settings */
       ),
       darkTheme: ThemeData(
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         /* dark theme settings */
       ),
+      debugShowCheckedModeBanner: false,
       home: const MyHomePage(title: 'Monotone Home Page'),
     );
   }

@@ -43,6 +43,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, OneOf<string, Excep
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new(ClaimTypes.Name, user.UserName!),
+                    new ("ProfilePicture", Convert.ToBase64String(user.ProfilePicture) ),
                     new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new(ClaimTypes.NameIdentifier, user.Id)
                 }),

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
+using Monotone.Utilities;
 
 namespace Monotone.Models;
 
@@ -38,11 +39,12 @@ public class ApplicationUser : IdentityUser<string>
     public override bool LockoutEnabled { get; set; }
     [JsonIgnore]
     public override int AccessFailedCount { get; set; }
-    [JsonIgnore]
 
+    
+    [JsonConverter(typeof(ByteArrayConverter))]
     public byte[] ProfilePicture { get; set; } = Array.Empty<byte>();
+    
     [JsonIgnore]
-
     public List<ApplicationUser> Contacts { get; set; } = new List<ApplicationUser>();
     [JsonIgnore]
     public DateTime CreatedAt { get; set; } 

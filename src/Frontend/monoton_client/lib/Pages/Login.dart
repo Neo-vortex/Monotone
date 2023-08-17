@@ -16,6 +16,30 @@ class LoginScreen extends StatefulWidget {
 class _LoginScrenState extends State<LoginScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+
+
+  void _showMessageBox(BuildContext context, String message, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -78,14 +102,8 @@ class _LoginScrenState extends State<LoginScreen> {
                       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) =>  const HomeScreen()));
 
                     }catch (e){
-                      Fluttertoast.showToast(
-                          msg: "Invalid Login",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.CENTER,
-                          timeInSecForIosWeb: 1,
-                          textColor: Colors.white,
-                          fontSize: 16.0
-                      );
+                      context.loaderOverlay.hide();
+                      _showMessageBox(context, "Invalid login", "Login" );
                     }
                   }, child: const Text("Login")),
                   TextButton(onPressed: (){

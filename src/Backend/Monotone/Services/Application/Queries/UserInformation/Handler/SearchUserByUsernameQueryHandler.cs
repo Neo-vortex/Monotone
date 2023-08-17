@@ -20,7 +20,8 @@ public class SearchUserByUsernameQueryHandler : IRequestHandler<SearchUserByUser
         {
             var users = _applicationDbContext.Users
                 .Where(user => user.UserName.Contains(request.SearchKey))
-                .Take(20);
+                .Take(20)
+                .Select(user => new ApplicationUser() {Id = user.Id, UserName = user.UserName , ProfilePicture = user.ProfilePicture});
             if (!await users.AnyAsync(cancellationToken: cancellationToken))
             {
                 return new List<ApplicationUser>();

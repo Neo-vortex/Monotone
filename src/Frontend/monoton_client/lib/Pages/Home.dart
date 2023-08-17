@@ -7,8 +7,13 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:monoton_client/Models/Dto/Request/SendMessage.dart';
 import 'package:monoton_client/Models/Enum/MessageType.dart';
+import 'package:monoton_client/Models/Widgets/ChatItem.dart';
+import 'package:monoton_client/Pages/CreateNewPrivateChat.dart';
 import 'package:monoton_client/Services/SignalRService.dart';
+import 'package:monoton_client/Services/StorageService.dart';
 import 'package:monoton_client/Utilities/Utilities.dart';
+import 'package:monoton_client/main.dart';
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 
 import '../Services/RestService.dart';
 
@@ -22,11 +27,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String title = "Monotone (Connecting...)";
   bool connectedForTheFirstTime = false;
+  List<ChatData> chats = [
+  ];
+  List<ChatData> filteredChats = [];
+
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+  late final Timer _initServiceTimer;
   @override
   void initState()  {
     super.initState();
-    scheduleInitServices();
-
+    filteredChats = chats;
+    _initServiceTimer =  scheduleInitServices();
   }
 
 
@@ -59,15 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
               heroTag: null,
               child: const Icon(Icons.person),
               onPressed: () async {
-                 var message =  new SendMessage();
-                  message.content = Utilities.stringToByteArray("hello world");
-                  message.isReplay = false;
-                  message.messageType = MessageType.TEXT;
-                  message.metadata = "";
-                  message.resourceAddress = "";
-                  message.targetChatId = "123456";
-                  var answ =   await SignalRService.hubConnection.invoke("SendMessage", args:  <Object> [ json.encode(message) ] );
-                  log(answ as String);
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) =>  const CreateNewPrivateChat()));
                   },
             ),
             FloatingActionButton.small(
@@ -83,23 +86,62 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               icon: Icon(
-                Icons.settings,
+                Icons.logout,
                 color: Colors.white,
               ),
-              onPressed: () {
-                EasyLoading.showSuccess("ok");
+              onPressed: () async {
+                await StorageService.storage.deleteAll();
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) =>  const MyApp()));
+
                 // do something
               },
             )
           ],
         ),
-        body: Center(
-          child: Column(
+        body:
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child:   Column(
             children: [
-              Text("Chats")
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child:       Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    onChanged: filterChats,
+                    decoration: InputDecoration(
+                      hintText: 'Search',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(child:    SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: true,
+                header: const WaterDropHeader(),
+                controller: _refreshController,
+                onRefresh: _onRefresh,
+                onLoading: _onLoading,
+                child:  ListView.builder(
+                  itemCount: filteredChats.length,
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      height: 80,
+                      child: ChatItem(chatData: filteredChats[index], onDelete: (ChatData ) {  }, onArchive: (ChatData ) {  },),
+                    );
+                  },
+                ),
+              ))
+           ,
             ],
           ),
-        ),
+        )
+
+
       ),
     );
   }
@@ -125,29 +167,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   Future initServices() async {
-    if (connectedForTheFirstTime){
+    if (connectedForTheFirstTime) {
       return;
     }
-    var restResult =  await RestService.init();
-    if (!restResult){
+    connectedForTheFirstTime = true;
+    var restResult = await RestService.init();
+    if (!restResult) {
+      connectedForTheFirstTime = false;
       return;
     }
     var signalResult = await SignalRService.init();
 
-    if (!signalResult){
+    if (!signalResult) {
+      connectedForTheFirstTime = false;
       return;
     }
-    connectedForTheFirstTime = true;
     SignalRService.hubConnection.onclose(({error}) {
-      SignalRService.ready  = false;
+      SignalRService.ready = false;
       setState(() {
         title = "Monotone (Disconnected)";
-      }); });
-    SignalRService.hubConnection.onreconnecting(({error}) { setState(() {
-      title = "Monotone (Reconnecting...)";
-    }); });
+      });
+    });
+    SignalRService.hubConnection.onreconnecting(({error}) {
+      setState(() {
+        title = "Monotone (Reconnecting...)";
+      });
+    });
     SignalRService.hubConnection.onreconnected(({connectionId}) {
-      SignalRService.ready  = true;
+      SignalRService.ready = true;
       setState(() {
         title = "Monotone";
       });
@@ -156,6 +203,31 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       title = "Monotone";
     });
+    _initServiceTimer.cancel();
+    _refreshController.requestRefresh();
+  }
+
+  void filterChats(String query) {
+    setState(() {
+      filteredChats = chats.where((chat) =>
+          chat.title.toLowerCase().contains(query.toLowerCase())).toList();
+    });
+  }
+
+  void _onRefresh() async{
+    await refreshAllChatList();
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async{
+    await Future.delayed(Duration(milliseconds: 1000));
+    _refreshController.loadComplete();
+  }
+
+
+
+  Future refreshAllChatList() async{
+
   }
 
 }

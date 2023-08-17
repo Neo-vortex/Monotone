@@ -16,7 +16,11 @@ builder.AddVortexSerilog(overrideMicrosoftDebugLogLevel: true);
 
 builder.Services.SwitchLegacyTimestampBehaviorPostgres();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -46,7 +50,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddIdentity<ApplicationUser, Role>()
+builder.Services.AddIdentityCore<ApplicationUser>()
+    .AddDefaultTokenProviders()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
