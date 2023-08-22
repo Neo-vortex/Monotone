@@ -16,6 +16,8 @@ public record Message
     public DateTime CreatedAt { get; set; }
     public MessageType MessageType { get; set; }
     public string ResourceAddress { get; set; } = string.Empty;
+    
+    public MessageResourceType MessageResourceType { get; set; } 
     public bool IsReplay { get; set; }
     public string Metadata { get; set; } = string.Empty;
     public List<ApplicationUser> SeenBy { get; set; } = new();

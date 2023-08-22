@@ -44,6 +44,8 @@ dependencies:
   build_runner: ^2.4.6
   json_annotation: ^4.8.1
   pull_to_refresh_flutter3: ^2.0.1
+  flutter_ringtone_player: ^3.2.0
+  animated_text_kit: ^4.2.2
 
 
 

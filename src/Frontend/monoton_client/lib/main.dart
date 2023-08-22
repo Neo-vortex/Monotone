@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:monoton_client/Pages/Login.dart';
@@ -61,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3),
+    Timer(const Duration(seconds: 5),
             () async {
       if (await checkJwtExists()){
 
@@ -85,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.light,
+        brightness: Brightness.dark,
         /* light theme settings */
       ),
       darkTheme: ThemeData(
@@ -95,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
-      home:  const Scaffold(
+      home:   Scaffold(
           body:  Center(
               child:
               Column(
@@ -107,7 +108,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.blueAccent,
                     size: 50.0,
                   ),
-                  Text("Monotone"),
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      ColorizeAnimatedText(
+                        'Monotone',
+                        textStyle: const TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold), colors: [Colors.blue,Colors.red],
+                      ),
+                      TypewriterAnimatedText(
+                        'Fast and Simple',
+                        textStyle: const TextStyle(fontSize: 40.0, fontFamily: 'Canterbury'),
+                      ),
+                    ],
+                    isRepeatingAnimation: true,
+                  ),
+
                ],
               )
           )),

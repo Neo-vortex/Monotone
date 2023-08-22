@@ -5,9 +5,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:monoton_client/Models/Dto/Request/SendMessage.dart';
 import 'package:monoton_client/Models/Enum/MessageType.dart';
 import 'package:monoton_client/Models/Widgets/ChatItem.dart';
+import 'package:monoton_client/Pages/Conversation.dart';
 import 'package:monoton_client/Pages/CreateNewPrivateChat.dart';
 import 'package:monoton_client/Services/SignalRService.dart';
 import 'package:monoton_client/Services/StorageService.dart';
@@ -61,6 +63,30 @@ class _HomeScreenState extends State<HomeScreen> {
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
       home: Scaffold(
+
+        drawer: Drawer(
+          child: ListView(
+            children: const [
+              DrawerHeader(child: Text("Monoton")),
+              ListTile(
+                title: Text(
+                  'Profile',
+                ),
+                leading: Icon(
+                  Icons.person,
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  'Share',
+                ),
+                leading: Icon(
+                  Icons.share,
+                ),
+              ),
+            ],
+          ),
+        ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton:  ExpandableFab(
 
@@ -131,7 +157,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     return SizedBox(
                       height: 80,
-                      child: ChatItem(chatData: filteredChats[index], onDelete: (ChatData ) {  }, onArchive: (ChatData ) {  },),
+                      child: ChatItem(chatData: filteredChats[index],
+                        onDelete: (ChatData ) {
+
+                      },
+                        onArchive: (ChatData ) {
+
+                        },
+                        onTap: (String ) async {
+                          await  Navigator.of(context).push(MaterialPageRoute(builder: (context) =>  Conversation(chatData: filteredChats[index],)));
+                          refreshAllChatList(reload: false);
+
+                        },),
                     );
                   },
                 ),
@@ -215,19 +252,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onRefresh() async{
-    await refreshAllChatList();
-    _refreshController.refreshCompleted();
+     await refreshAllChatList();
+     _refreshController.refreshCompleted();
+
   }
 
   void _onLoading() async{
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));
     _refreshController.loadComplete();
   }
 
 
 
-  Future refreshAllChatList() async{
-
+  Future refreshAllChatList({bool reload = true}) async{
+    var result  = await RestService.GetMyChats();
+    if (result != null){
+      if (result.any((element) => element.number > 0) && reload ){
+        FlutterRingtonePlayer.playNotification();
+      }
+    }
+    setState(() {
+      if (result != null){
+        chats = result;
+        filteredChats = result;
+      }
+    });
   }
-
 }

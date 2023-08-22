@@ -53,8 +53,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddDefaultTokenProviders()
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddSignalR()
     .AddJsonProtocol(options => { options.PayloadSerializerOptions.PropertyNamingPolicy = null; });
@@ -141,5 +140,5 @@ void SetupDatabase()
 }
 
 
-app.MapHub<Notification>("/notification");
+app.MapHub<RealTimeServices>("/notification");
 app.Run();

@@ -43,6 +43,7 @@
       <Folder Include="Controllers\Ping\" />
       <Folder Include="logs\web\" />
       <Folder Include="Models\Dto\Response\" />
+      <Folder Include="Services\Application\Commands\Message\Queries\" />
     </ItemGroup>
 
 </Project>
